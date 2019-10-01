@@ -8,3 +8,8 @@
 # Homework:
 
 * [HW2](1sKDYoLaxYXK2GnJAbABoMdTejlT1p2Z_Dap87IL_GAI)
+
+
+# R Exercises 
+
+* [exercise 2](https://docs.google.com/document/d/13h-kAYQeEnfjiJvC7nMt5ur9SqH1JYsVCvUVkR0ySGs/edit)
