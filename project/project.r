@@ -6,21 +6,24 @@ library('dplyr')
 install.packages('tidyverse')
 library('tidyverse')
 
-### Import Datasets
+# Set the working directory to this script's directory
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+### Import Datasets
 # by Indicator name from https://www.gapminder.org/data/
 
 # Adults with HIV (%, age 15-49)
-Adults_HIV = read.csv("data/Adults_15-49_HIV.csv", header = TRUE, check.names = FALSE)
+Adults_HIV = read.csv("data/Adults_15-49_HIV.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
-# Underweight children
-Underweight_children = read.csv("data/Underweight_children.csv", header = TRUE, check.names = FALSE)
+# Underweight children (added the fileEncoding, think its a Windows issue)
+Underweight_children = read.csv("data/Underweight_children.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
+
 
 # Total GDP (PPP$, inflation-adjusted)
-gdp_total_ppp = read.csv("data/gdp_total_ppp.csv", header = TRUE, check.names = FALSE)
+gdp_total_ppp = read.csv("data/gdp_total_ppp.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
 # Population aged 40-59 years, female (%)
-female_40_59_pop_percent = read.csv("data/female_40_59_pop_percent.csv", header = TRUE, check.names = FALSE)
+female_40_59_pop_percent = read.csv("data/female_40_59_pop_percent.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
 ### Make Long dataframes from data
 Adults_HIV_long = Adults_HIV %>% gather(key = 'year', value = 'Adults_HIV', -country)
@@ -44,4 +47,5 @@ total_data = full_join(female_40_59_pop_percent_long, total_data, by = c('countr
 total_data  %>% group_by(country) %>% summarise(avg = mean(Adults_HIV, na.rm = TRUE))
 
 # examlpe of how to drill down 
-drilled_down_data_ex = total_data  %>%  group_by(country)%>% filter(year > 1900 & Adults_HIV > 0.00 & Underweight_children > 0.00 )
+drilled_down_data_ex = total_data  %>%  group_by(country) %>% filter(year > 1900 & Adults_HIV > 0.00 & Underweight_children > 0.00)
+
