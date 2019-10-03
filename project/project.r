@@ -97,6 +97,21 @@ weight_vs_gdp_corr
 weight_vs_female_corr
 gdp_vs_female_corr
 
+# More additions from Kai
+
+# Correlation in depth, examining hiv vs underweight children correlation by counrty
+cor1 = drilled_down_data_ex %>%  group_by(country) %>% summarise(cor_pearson = cor(Adults_HIV, Underweight_children, method = 'pearson' )) %>% filter(!is.na(cor_pearson))
+
+# discretization
+
+#examine binning by time
+#hiv_vs_gdp_pearson_corr
+hiv_vs_gdp_pearson_corr_binned = transform(drilled_down_data_ex, bin = cut(as.numeric(year), 5))
+hiv_vs_gdp_pearson_corr_binned = hiv_vs_gdp_pearson_corr_binned %>%  group_by(bin)  %>% summarise(cor_pearson = cor(Adults_HIV, gdp_total_ppp, method = 'pearson' )) %>% filter(!is.na(cor_pearson))
+
+# examine binning by hiv infection rate
+hiv_vs_gdp_pearson_corr_binned_hiv = transform(drilled_down_data_ex, bin = cut(Adults_HIV, 3))
+hiv_vs_gdp_pearson_corr_binned_hiv = hiv_vs_gdp_pearson_corr_binned_hiv %>%  group_by( bin)  %>% summarise(cor_pearson = cor(Adults_HIV, gdp_total_ppp, method = 'pearson' )) %>% filter(!is.na(cor_pearson))
 
 
 
