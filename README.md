@@ -9,6 +9,8 @@
 
 * [HW2](1sKDYoLaxYXK2GnJAbABoMdTejlT1p2Z_Dap87IL_GAI)
 
+* [HW3](https://docs.google.com/document/d/1XAVjeB0ICLE_T6v2DZ6EQXsEITmr6pXIb3CXaNMAw0w/edit?ts=5d9bae4d)
+
 
 # R Exercises 
 
