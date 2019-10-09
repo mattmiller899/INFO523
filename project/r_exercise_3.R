@@ -10,10 +10,10 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # by Indicator name from https://www.gapminder.org/data/
 
 # Adults with HIV (%, age 15-49)
-Adults_HIV = read.csv("data/Adults_15-49_HIV.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
+adults_hiv = read.csv("data/Adults_15-49_HIV.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
 # Underweight children (added the fileEncoding, think its a Windows issue)
-Underweight_children = read.csv("data/Underweight_children.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
+underweight_children = read.csv("data/Underweight_Children.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
 
 # Total GDP (PPP$, inflation-adjusted)
@@ -22,8 +22,8 @@ gdp_total_ppp = read.csv("data/gdp_total_ppp.csv", header = TRUE, check.names = 
 # Population aged 40-59 years, female (%)
 female_40_59_pop_percent = read.csv("data/female_40_59_pop_percent.csv", header = TRUE, check.names = FALSE, fileEncoding="UTF-8-BOM")
 
-hiv_table = Adults_HIV %>% gather(key = 'year', value = 'Adults_HIV', -country)
-underweight_table = Underweight_children %>% gather(key = 'year', value = 'Underweight_children', -country)
+hiv_table = adults_hiv %>% gather(key = 'year', value = 'adults_hiv', -country)
+underweight_table = underweight_children %>% gather(key = 'year', value = 'underweight_children', -country)
 gdp_table = gdp_total_ppp %>% gather(key = 'year', value = 'gdp_total_ppp', -country)
 female_table = female_40_59_pop_percent %>% gather(key = 'year', value = 'female_40_59_pop_percent', -country)
 
