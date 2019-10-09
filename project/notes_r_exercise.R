@@ -35,4 +35,44 @@ head(sales_fact)
                         sales_fact[,c("prod", "month", "year", "loc")],
                         FUN=function(x){return(sum(x))}))
 
+#Slice
+revenue_cube[, , , "CA"]
 
+#Dice
+revenue_cube[c("Laptop", "Tablet"), c("1", "2", "3"), , c("CA", "NY")]
+
+#Rollup
+apply(revenue_cube, c("year", "prod"), FUN=function(x) sum(x, na.rm=TRUE))
+
+#Drilldown
+apply(revenue_cube, c("year", "month", "prod"), FUN=function(x) sum(x, na.rm=TRUE))
+
+#Pivot
+apply(revenue_cube, c("year", "month"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("month", "year"), FUN=function(x) sum(x, na.rm=TRUE))
+
+#rollup and dice
+(rollup <-apply(revenue_cube, c("loc", "prod", "year"), FUN=function(x) sum(x, na.rm=TRUE)))
+dimnames(rollup)
+
+#Dice loc and year
+(rollup["CA",, "2012"])
+
+#Compare and contrast
+revenue_cube[, ,"2012" , "CA"]
+
+#Apex cuboid
+sum(apply(revenue_cube, c("year"), FUN=function(x) sum(x, na.rm=TRUE)))
+
+#1D cuboids
+apply(revenue_cube, c("year"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("prod"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("month"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("loc"), FUN=function(x) sum(x, na.rm=TRUE))
+
+#2d cuboids
+apply(revenue_cube, c("year", "prod"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("year", "month"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("year", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("prod", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
+apply(revenue_cube, c("month", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
