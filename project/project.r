@@ -110,5 +110,7 @@ hiv_vs_gdp_pearson_corr_binned = hiv_vs_gdp_pearson_corr_binned %>%  group_by(bi
 hiv_vs_gdp_pearson_corr_binned_hiv = transform(drilled_down_data_ex, bin = cut(adults_hiv, 3))
 hiv_vs_gdp_pearson_corr_binned_hiv = hiv_vs_gdp_pearson_corr_binned_hiv %>%  group_by( bin)  %>% summarise(cor_pearson = cor(adults_hiv, gdp_total_ppp, method = 'pearson' )) %>% filter(!is.na(cor_pearson))
 
+#spread: useful command to undo the gather operation (basically)
+spread(total_data, year, gdp_total_ppp)
 
-
+#Ideas: get rid of years in the future (% middle aged female has years to 2050)

@@ -83,3 +83,5 @@ apply(revenue_cube, c("year", "prod", "month"), FUN=function(x) sum(x, na.rm=TRU
 apply(revenue_cube, c("year", "prod", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
 apply(revenue_cube, c("year", "month", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
 apply(revenue_cube, c("month", "prod", "loc"), FUN=function(x) sum(x, na.rm=TRUE))
+
+
