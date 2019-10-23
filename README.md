@@ -11,6 +11,7 @@
 
 * [HW3](https://docs.google.com/document/d/1XAVjeB0ICLE_T6v2DZ6EQXsEITmr6pXIb3CXaNMAw0w/edit?ts=5d9bae4d)
 
+* [HW4](https://docs.google.com/document/d/19Web0xdrxyWsvW7ZYI1z7sCmDHYM6jSM6TS_dzi1Dzg/edit)
 
 # R Exercises 
 
