@@ -13,6 +13,9 @@
 
 * [HW4](https://docs.google.com/document/d/19Web0xdrxyWsvW7ZYI1z7sCmDHYM6jSM6TS_dzi1Dzg/edit)
 
+* [HW5](https://docs.google.com/document/d/1sYCB04BN0k5v9x29BdhAuzrUkz5-SrhQIwsVBn4sokg/edit?ts=5dc082a3)
+
+
 # R Exercises 
 
 * [exercise 2](https://docs.google.com/document/d/13h-kAYQeEnfjiJvC7nMt5ur9SqH1JYsVCvUVkR0ySGs/edit)
