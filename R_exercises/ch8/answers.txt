@@ -1,0 +1,13 @@
+1.	Build a decision tree (regression or classification) and use one ensemble method on your own dataset.
+
+Built a classification decision tree, as well as tried bagging for the ensemble method
+
+2.	List at least two interesting rules from the decision tree your generated.
+
+`when underweight_children is 5.4 to 28.8 & gdp_total_ppp is 2.5e+11 to 3.8e+11 & adults_hiv < 6.45`
+
+`when underweight_children >= 39.7 & gdp_total_ppp >= 8.4e+10`
+
+3.	Does the ensemble method improve the performance on your dataset?
+
+Error rate drops from 0.8 with classification decision tree to 0.7 with bagging, note that we only did 10 rounds of bagging, as it was taking forever to run on a laptop.
