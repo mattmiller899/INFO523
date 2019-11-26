@@ -15,6 +15,9 @@
 
 * [HW5](https://docs.google.com/document/d/1sYCB04BN0k5v9x29BdhAuzrUkz5-SrhQIwsVBn4sokg/edit?ts=5dc082a3)
 
+* [HW6](https://docs.google.com/document/d/1t3e4NklH-pOvqmZ22unExhE8d3vIEQXJWc7i_4p7TsQ/edit)
+
+
 
 # R Exercises 
 
