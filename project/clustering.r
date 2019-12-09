@@ -75,10 +75,36 @@ data_trimmed$country <- as.factor(data_trimmed$country)
 # make year as numeric
 data_trimmed$year <- as.numeric(data_trimmed$year)
 
+#### Normalization function
+#Function to perform Min max normalize data
+normalize <- function(x)
+{
+  return((x- min(x)) /(max(x)-min(x)))
+}
+
+### Select year
 #1970 and 2008 work nicely
 df = total_data  %>%  group_by(country) %>% filter(year == 2008 )
 df = drop_na(df)
 df = subset(df, select = -year)
+
+
+### make normalized verion of the data:
+df_n = df
+#normalize df columns
+df_n$res_electricity <- normalize(df$res_electricity)
+df_n$women_years_school <- normalize(df$women_years_school)
+df_n$life_expectancy <- normalize(df$life_expectancy)
+df_n$gini <- normalize(df$gini)
+df_n$co2_emissions <- normalize(df$co2_emissions)
+df_n$children_per_woman <- normalize(df$children_per_woman)
+df_n$gdp <- normalize(df$gdp)
+df_n$child_mortality <- normalize(df$child_mortality)
+
+###############################################################
+################## PAM clustering ###########################
+
+######### Log Transformed data #########
 
 # Calculate distance among the observations
 # using the gower distance
@@ -123,15 +149,6 @@ pam_results <- df %>%
 
 pam_results$the_summary
 
-
-#Resuts suggest three distinct clusters with the following means:
-
-#          res_electricity, women_years_school, life_expectancy,  gini coef,    co2_emissions, children_per_woman, gdp,             child_mortality
-#Cluster1: Mean:5.556e+10   Mean:12.15           Mean:77.16       Mean:33.2    Mean:10.174    Mean:1.677          Mean:8.345e+11    Mean: 8.353
-#Cluster2: Mean:3.094e+10   Mean:9.834           Mean:74.26       Mean:41.94   Mean:4.414     Mean:2.455          Mean:7.401e+11    Mean:22.45 
-#Cluster3: Mean:7.972e+09   Mean:6.684           Mean:60.60       Mean:44.02   Mean:1.2321    Mean:4.308          Mean:2.604e+11    Mean: 82.21
-
-
 ##Cluster Interpretation: via visualization
 #One way to visualize many variables in a lower dimensional space is with t-distributed stochastic neighborhood embedding, or t-SNE. 
 #This method is a dimension reduction technique that tries to preserve local structure so as to make clusters visible in a 2D or 3D visualization.
@@ -153,25 +170,188 @@ result1 %>% arrange(pam_fit.cluster)
 
 # The results fit almost perfectly with the understanding of what we'd think of as 1st world (developed) 2nd world and 3rd (developing) countries. 
 
-#build a hierarchical cluster 
-#method argument takes the agglomeration method to be used. This should be (an unambiguous abbreviation of)
-# one of "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
 
-h <- hclust(gower_dist, method="ward.D2")
+######### Kmeans
+#cluster the same data set using kmeans
+#different implementations of kmeans are provided throught the algorithm argument to
+#kmeans() method: "Hartigan-Wong", "Lloyd", "Forgy", "MacQueen". The default H-W implementation works well in most cases.  
+#To know more about the differences see https://core.ac.uk/download/pdf/27210461.pdf 
 
-#plot the dendrogram, #hang decides where to start labels on axis. -0.1 is negative, so the x-axis labels will hang down from 0
-plot(h, hang=-0.1)
+# Logtransfrom data prior 
 
-clus2 <- cutree(h, 2)
-table(result1$pam_fit.cluster, clus2)
+df.log = log(df[,2:8]+1)
 
-#If we want three clusters
-clus3 <- cutree(h, 3)
-table(result1$pam_fit.cluster, clus3)
+#kmeans() take numeric data, 
+#get distance matrix, excluding first column: name
+#note: nstart is the parameter that allows the user to try multiple sets of initial centroids. You should use a nstart > 1, for example, nstart=25, this will run kmeans nstart number of times, each time with a different set of initial centroids. kmeans will then select the one with the lowest within cluster variation.
+dist_mat <- dist(df.log, method="euclidean")
+avgS <- c() #initiate an empty vector
+for(k in 2:10){
+     kmeans_cl <- kmeans(df.log, centers=k, iter.max=500, nstart=1)
+     s <- silhouette(kmeans_cl$cluster, dist_mat)
+     avgS <- c(avgS, mean(s[,3])) # take the mean of sil_width of all observations, and save it in the avgS vector
+   }
+data.frame(nClus=2:10, Silh=avgS)
 
-#When using the ward.D2 method to do hierarchical clustering, we find that the results of cutting the dendrogram into 3 partitions 
-# very closely matches how the PAM clusters.  
+plot(2:10, avgS,
+             xlab = "Number of clusters",
+             ylab = "Silhouette Width")
+lines(2:10, avgS)
 
-clus4 <- cutree(h, 4)
-table(result1$pam_fit.cluster, clus4)
+kmeans_fit <- kmeans(df.log, 3)
+#get cluster means
+aggregate(df.log,by=list(kmeans_fit$cluster),FUN=mean)
 
+
+# append cluster assignment to data
+df_clean_n <- data.frame(df, kmeans_fit$cluster)
+##Cluster Interpretation:via visualization
+tsne_obj <- Rtsne(dist_mat, is_distance = TRUE)
+tsne_data <- tsne_obj$Y %>%
+    data.frame() %>%
+    setNames(c("X", "Y")) %>%
+   mutate(cluster = factor(kmeans_fit$cluster),
+                       name = df_clean_n$name)
+ggplot(aes(x = X, y = Y), data = tsne_data) +
+     geom_point(aes(color = cluster))
+
+#TSNE is a powerful but sometimes puzzling technique More see https://distill.pub/2016/misread-tsne/
+  
+  
+# append cluster assignment to data
+df_clean_n <- data.frame(df_clean_n, kmeans_fit$cluster)
+#college_clean_n
+result2 <- df_clean_n %>% dplyr::select(country,kmeans_fit.cluster)
+View(result2)
+result2.copy <- result2
+
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==2] <- 0
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==1] <- 2
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==0] <- 1
+#now create a confusion table to see the differences in the two clusterings
+table(result1$pam_fit.cluster, result2$kmeans_fit.cluster)
+
+
+
+
+
+
+######### Min Max normalized data #########
+
+# Calculate distance among the observations
+# using the gower distance
+gower_dist <- daisy(df_n[, -1], metric = "gower", type = list())
+summary(gower_dist)
+gower_mat <- as.matrix(gower_dist)
+
+# Use PAM (partitioning around medoids) to perform the clustering
+# Calculate Silhouette width for 2 to 10 clusters using PAM
+sil <- c(NA)
+
+for(i in 2:10){
+  pam_fit <- pam(gower_mat, diss=TRUE, k=i)
+  sil[i] <-pam_fit$silinfo$avg.width }
+
+# Plot silhouette width 
+plot(1:10, sil,
+     xlab = "Number of clusters",
+     ylab = "Silhouette Width")
+lines(1:10, sil)
+
+# For silhouette width values (higher is better, clusters = 3 has the highest sil value)
+# without log transformation we see that 2 clusters give the highest Silhouette Width with values dropping off as number of clusters increases
+# when log transfored 2 is still best but 3 and 4 are closer to the Silhouette Width of 2. 
+# plotting the data using 3 clusters it partitions into 3 clusters. 
+
+#Cluster Interpretation:via Descriptive Statistics
+pam_fit <- pam(gower_dist, diss = TRUE, k = 3)
+
+#add cluster labels to the data. We will use result1 later
+df <- data.frame(df, pam_fit$cluster)
+#show clustering results by college
+result1 <- df %>% dplyr::select(country,pam_fit.cluster)
+#View(result1)
+
+#group_by cluster and then compute the summary data (means, median, etc) for each cluster
+pam_results <- df %>%
+  dplyr::select(-country) %>%
+  mutate(cluster = pam_fit$clustering) %>% #add the cluster column
+  group_by(cluster) %>% #group universities by its cluster 
+  do(the_summary = summary(.)) #do: summarize by group/cluster,add the_summary column
+
+pam_results$the_summary
+
+##Cluster Interpretation: via visualization
+#One way to visualize many variables in a lower dimensional space is with t-distributed stochastic neighborhood embedding, or t-SNE. 
+#This method is a dimension reduction technique that tries to preserve local structure so as to make clusters visible in a 2D or 3D visualization.
+#it is a powerful but also sometimes puzzling technique, more see https://distill.pub/2016/misread-tsne/ 
+
+tsne_obj <- Rtsne(gower_dist, is_distance = TRUE)
+
+tsne_data <- tsne_obj$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y")) %>%
+  mutate(cluster = factor(pam_fit$clustering), name = df$country)
+
+ggplot(aes(x = X, y = Y), data = tsne_data) +
+  geom_point(aes(color = cluster))
+
+tsne_data %>% select(cluster = 1) 
+
+result1 %>% arrange(pam_fit.cluster)
+
+
+######### Kmeans
+#cluster the same data set using kmeans
+#different implementations of kmeans are provided throught the algorithm argument to
+#kmeans() method: "Hartigan-Wong", "Lloyd", "Forgy", "MacQueen". The default H-W implementation works well in most cases.  
+#To know more about the differences see https://core.ac.uk/download/pdf/27210461.pdf 
+
+#kmeans() take numeric data, 
+#get distance matrix, excluding first column: name
+#note: nstart is the parameter that allows the user to try multiple sets of initial centroids. You should use a nstart > 1, for example, nstart=25, this will run kmeans nstart number of times, each time with a different set of initial centroids. kmeans will then select the one with the lowest within cluster variation.
+dist_mat <- dist(df_n[, -1], method="euclidean")
+avgS <- c() #initiate an empty vector
+for(k in 2:10){
+  kmeans_cl <- kmeans(df_n[, -1], centers=k, iter.max=500, nstart=1)
+  s <- silhouette(kmeans_cl$cluster, dist_mat)
+  avgS <- c(avgS, mean(s[,3])) # take the mean of sil_width of all observations, and save it in the avgS vector
+}
+data.frame(nClus=2:10, Silh=avgS)
+
+plot(2:10, avgS,
+     xlab = "Number of clusters",
+     ylab = "Silhouette Width")
+lines(2:10, avgS)
+
+kmeans_fit <- kmeans(df_n[, -1], 3)
+#get cluster means
+aggregate(df_n[, -1],by=list(kmeans_fit$cluster),FUN=mean)
+
+
+# append cluster assignment to data
+df_clean_n <- data.frame(df, kmeans_fit$cluster)
+##Cluster Interpretation:via visualization
+tsne_obj <- Rtsne(dist_mat, is_distance = TRUE)
+tsne_data <- tsne_obj$Y %>%
+  data.frame() %>%
+  setNames(c("X", "Y")) %>%
+  mutate(cluster = factor(kmeans_fit$cluster),
+         name = df_clean_n$name)
+ggplot(aes(x = X, y = Y), data = tsne_data) +
+  geom_point(aes(color = cluster))
+
+#TSNE is a powerful but sometimes puzzling technique More see https://distill.pub/2016/misread-tsne/
+
+# append cluster assignment to data
+df_clean_n <- data.frame(df_clean_n, kmeans_fit$cluster)
+#college_clean_n
+result2 <- df_clean_n %>% dplyr::select(country,kmeans_fit.cluster)
+View(result2)
+result2.copy <- result2
+
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==2] <- 0
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==1] <- 2
+result2$kmeans_fit.cluster[result2$kmeans_fit.cluster==0] <- 1
+#now create a confusion table to see the differences in the two clusterings
+table(result1$pam_fit.cluster, result2$kmeans_fit.cluster)
