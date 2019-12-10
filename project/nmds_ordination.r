@@ -114,7 +114,7 @@ orditorp(my.pcoa, 'sites', labels = df$country)
 #points(pl, "sites", pch=21, col="red", bg="yellow")
 text(pl, "species", col="blue", cex=0.9)
 
-
+########################## testing ################################
 ### testing PCOA purposes
 # Draw a plot for a non-vegan ordination (cmdscale).
 data(dune)
@@ -129,3 +129,110 @@ text(pl, "species", col="blue", cex=0.9)
 pl <- ordiplot(dune.mds)
 identify(pl, "spec")
 ## End(Not run)
+
+
+#### testing cca https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/cca
+
+# Note about cca: The shotgun method is to use all environmental variables as constraints. 
+# However, such exploratory problems are better analysed with unconstrained methods such as 
+# correspondence analysis (decorana, corresp) or non-metric multidimensional scaling (metaMDS) 
+# and environmental interpretation after analysis (envfit, ordisurf). CCA is a good choice if 
+# the user has clear and strong a priori hypotheses on constraints and is not interested in 
+# the major structure in the data set.
+
+data(varespec)
+data(varechem)
+## Common but bad way: use all variables you happen to have in your
+## environmental data matrix
+vare.cca <- cca(varespec, varechem)
+vare.cca
+plot(vare.cca)
+## Formula interface and a better model
+vare.cca <- cca(varespec ~ Al + P*(K + Baresoil), data=varechem)
+vare.cca
+plot(vare.cca)
+## `Partialling out' and `negative components of variance'
+cca(varespec ~ Ca, varechem)
+cca(varespec ~ Ca + Condition(pH), varechem)
+## RDA
+data(dune)
+data(dune.env)
+dune.Manure <- rda(dune ~ Manure, dune.env)
+plot(dune.Manure) 
+
+
+## The recommended way of running NMDS (Minchin 1987)
+data(dune)
+# Global NMDS using monoMDS
+sol <- metaMDS(dune)
+sol
+plot(sol, type="t")
+## Start from previous best solution
+sol <- metaMDS(dune, previous.best = sol)
+## Local NMDS and stress 2 of monoMDS
+sol2 <- metaMDS(dune, model = "local", stress=2)
+sol2
+plot(sol2, type="t")
+
+## Use Arrhenius exponent 'z' as a binary dissimilarity measure
+sol <- metaMDS(dune, distfun = betadiver, distance = "z")
+sol
+
+
+### decorana
+# Detrended Correspondence Analysis and Basic Reciprocal Averaging
+
+data(varespec)
+vare.dca <- decorana(varespec)
+vare.dca
+summary(vare.dca)
+plot(vare.dca)
+
+### the detrending rationale:
+gaussresp <- function(x,u) exp(-(x-u)^2/2)
+x <- seq(0,6,length=15) ## The gradient
+u <- seq(-2,8,len=23)   ## The optima
+pack <- outer(x,u,gaussresp)
+matplot(x, pack, type="l", main="Species packing")
+opar <- par(mfrow=c(2,2))
+plot(scores(prcomp(pack)), asp=1, type="b", main="PCA")
+plot(scores(decorana(pack, ira=1)), asp=1, type="b", main="CA")
+plot(scores(decorana(pack)), asp=1, type="b", main="DCA")
+plot(scores(cca(pack ~ x), dis="sites"), asp=1, type="b", main="CCA")
+
+#### corresp
+###Simple Correspondence Analysis
+# package ‘corresp’ is not available (for R version 3.6.0) Nevermind
+#install.packages('corresp')
+#library('corresp')
+#(ct <- corresp(~ N + P, data = varechem))
+#plot(ct)
+#corresp(caith)
+#biplot(corresp(caith, nf = 2))
+
+### envfit
+# Fits an Environmental Vector or Factor onto an Ordination
+
+# could do this instead of having cca app, instead run PCOA 
+# first then allow additional option to add the env fit from the
+# ontology searched env parameters over top. 
+
+par(mfrow=c(1,1))
+data(varespec, varechem)
+library(MASS)
+ord <- metaMDS(varespec)
+(fit <- envfit(ord, varechem, perm = 999))
+scores(fit, "vectors")
+plot(ord)
+plot(fit)
+plot(fit, p.max = 0.05, col = "red")
+## Adding fitted arrows to CCA. We use "lc" scores, and hope
+## that arrows are scaled similarly in cca and envfit plots
+ord <- cca(varespec ~ Al + P + K, varechem)
+plot(ord, type="p")
+fit <- envfit(ord, varechem, perm = 999, display = "lc")
+plot(fit, p.max = 0.05, col = "red")
+## 'scaling' must be set similarly in envfit and in ordination plot
+plot(ord, type = "p", scaling = "sites")
+fit <- envfit(ord, varechem, perm = 0, display = "lc", scaling = "sites")
+plot(fit, col = "red")
