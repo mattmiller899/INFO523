@@ -2,13 +2,14 @@
 # Data Availible from https://www.gapminder.org/data/
 
 install.packages('dplyr')
-library('dplyr')
 install.packages('tidyverse')
+
+library('dplyr')
 library('tidyverse')
 
 # Set the working directory to this script's directory
 # windows only
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 ### Import Datasets
 # by Indicator name from https://www.gapminder.org/data/
@@ -38,7 +39,7 @@ children_per_woman_table = children_per_woman %>% gather(key = 'year', value = '
 co2_emissions_table = co2_emissions %>% gather(key = 'year', value = 'co2_emissions', -country)
 gdp_table = gdp %>% gather(key = 'year', value = 'gdp', -country)
 gini_table = gini %>% gather(key = 'year', value = 'gini', -country)
-income_table  = income_per_person %>% gather(key = 'income_per_person', value = 'adults_hiv', -country)
+income_table  = income_per_person %>% gather(key = 'year', value = 'income_per_person', -country)
 life_expectancy_table = life_expectancy %>% gather(key = 'year', value = 'life_expectancy', -country)
 women_years_school_table = women_years_school %>% gather(key = 'year', value = 'women_years_school', -country)
 res_electricity_table = res_electricity %>% gather(key = 'year', value = 'res_electricity', -country)
@@ -74,4 +75,6 @@ normalize <- function(x)
 {
   return((x- min(x)) /(max(x)-min(x)))
 }
+
+# Rule Learning
 
