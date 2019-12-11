@@ -17,7 +17,7 @@
 
 * [HW6](https://docs.google.com/document/d/1t3e4NklH-pOvqmZ22unExhE8d3vIEQXJWc7i_4p7TsQ/edit)
 
-
+* [HW7](https://docs.google.com/document/d/1CoSCeK9QYVr3WkKapqxf5Khk0G2EvJ31iqJnTib7Klg/edit)
 
 # R Exercises 
 
